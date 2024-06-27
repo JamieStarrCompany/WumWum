@@ -1,0 +1,21 @@
+1. Home page must have h1 and then a hero to allow user to sign in
+
+(a)-> if sign-up is clicked, then make visible form below for signing-up if log-in then make visible below log-in button
+
+2. Make a form that allows user to create post -> this will bring up form where user can provide the following: title, and then text. 
+
+3. Store the title and text in two different lists and then show them in order of date posted. 
+
+4. optional - also records and displays the date and time posted???
+
+5. Design - purple and white, bold friendly letters, header and footer ejs with same design style
+
+6. make sure design is scalable for different screen sizes. 
+
+<li>
+        <h6> <%= date[i] %> </h6>
+      </li>
+
+      <li>
+        <%= body[i] %>
+      </li>

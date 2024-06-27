@@ -1,0 +1,234 @@
+<%- include("partials/header.ejs") %>
+<body>
+    <div class="container" id="mainContainer">
+        <div class="hero" id="hero">
+            <div class="heading mb-2">
+                <h1>Welcome to <span class="purp">WumWum</span></h1>
+                <p>a fun micro-blog</p>
+            </div>
+            <div class="btn">
+                <button class="btn btn-primary d-inline-flex align-items-center newPost" type="button">
+                    Create Post ✍️
+                </button>
+            </div>
+        </div>
+    
+        <div id="makePost" style="display:none;">
+            <form id="postForm" action="/submit" method="post">
+                <input type="hidden" id="postIndex" name="index" value="-1">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" placeholder="Enter the title" required/>
+                </div>
+                <div class="form-group">
+                    <label for="body">Body</label>
+                    <textarea class="form-control" id="body" name="body" rows="10" cols="50" placeholder="Write your post here..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+
+        <div class="a_tags" id="postLinksContainer">
+            <% if (title && title.length > 0) { %>
+                <ul>
+                    <% for (let i = 0; i < title.length; i++) { %>
+                        <li>
+                            <a href="#" class="post-link" data-body="<%= body[i] %>" data-title="<%= title[i] %>" data-index="<%= i %>"> <%= title[i] %>   
+                            </a>
+                            <button class="delete-post btn btn-danger btn-sm"  data-index="<%= i %>"> x </button>
+                            <button class="edit-post btn btn-secondary btn-sm" data-index="<%= i %>">Edit</button>
+                        </li>
+                    <% } %>
+                </ul>
+            <% } else { %>
+                <a id="noPosts">You have not made any posts!</a>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const newPostButton = document.querySelector(".newPost");
+            const postForm = document.getElementById("postForm");
+            const postIndexInput = document.getElementById("postIndex");
+            const postTitleInput = document.getElementById("title");
+            const postBodyInput = document.getElementById("body");
+
+            // Function to show the form for creating a new post
+            function showNewPostForm() {
+                const makeNewPost = document.getElementById("makePost");
+                makeNewPost.style.display = "flex";
+                makeNewPost.style.alignItems = "center";
+                makeNewPost.style.alignContent = "space-between";
+                makeNewPost.style.marginTop = "10%";
+                postIndexInput.value = -1;
+                postForm.action = "/submit";
+                postTitleInput.value = "";
+                postBodyInput.value = "";
+            }
+
+            // Attach event listener to the new post button
+            newPostButton.addEventListener("click", showNewPostForm);
+
+            // Function to handle delete post button clicks
+            function handleDeletePost(event) {
+                const index = event.target.getAttribute("data-index");
+                const listItem = event.target.parentElement;
+
+                // Send AJAX request to server to delete the post
+                fetch('/deletePost', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ index: index })
+                }).then(response => {
+                    if (response.ok) {
+                        listItem.remove();
+                    } else {
+                        console.error('Failed to delete the post');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+
+            // Attach event listeners to delete buttons
+            const deleteButtons = document.querySelectorAll(".delete-post");
+            deleteButtons.forEach(function(button) {
+                button.addEventListener("click", handleDeletePost);
+            });
+
+            // Function to handle edit post button clicks
+            function handleEditPost(event) {
+                const index = event.target.getAttribute("data-index");
+                const postLink = document.querySelector(`.post-link[data-index="${index}"]`);
+                const title = postLink.getAttribute("data-title");
+                const body = postLink.getAttribute("data-body");
+
+                // Populate the form with the existing post details
+                postTitleInput.value = title;
+                postBodyInput.value = body;
+                postIndexInput.value = index;
+                postForm.action = "/editPost";
+
+                // Show the form
+                const makeNewPost = document.getElementById("makePost");
+                makeNewPost.style.display = "flex";
+                makeNewPost.style.alignItems = "center";
+                makeNewPost.style.alignContent = "space-between";
+                makeNewPost.style.marginTop = "10%";
+            }
+
+            // Attach event listeners to edit buttons
+            const editButtons = document.querySelectorAll(".edit-post");
+            editButtons.forEach(function(button) {
+                button.addEventListener("click", handleEditPost);
+            });
+
+            // Handle clicks on post links to display the title and body
+            const postLinks = document.querySelectorAll(".post-link");
+            postLinks.forEach(function(link) {
+                link.addEventListener("click", function(event) {
+                    event.preventDefault();
+
+                    // Get the title and body content
+                    const titleContent = link.textContent.trim();
+                    const bodyContent = link.getAttribute("data-body");
+
+                    // Create new elements to display the title and body
+                    const newTitle = document.createElement("h1");
+                    newTitle.textContent = titleContent;
+                    const newBody = document.createElement("p");
+                    newBody.textContent = bodyContent;
+
+                    // Create a back button
+                    const backButton = document.createElement("button");
+                    backButton.textContent = "Back";
+                    backButton.className = "btn btn-secondary";
+                    backButton.addEventListener("click", function() {
+                        // Restore the original content
+                        document.getElementById("mainContainer").innerHTML = originalContent;
+                        // Reattach event listeners to the restored post links and new post button
+                        reattachEventListeners();
+                    });
+
+                    
+
+                    // Save the original content
+                    const originalContent = document.getElementById("mainContainer").innerHTML;
+
+                    // Clear the existing content
+                    const container = document.getElementById("mainContainer");
+                    container.innerHTML = "";
+
+                    // Append the new title, body, and back button to the container
+                    container.appendChild(newTitle);
+                    container.appendChild(newBody);
+                    container.appendChild(backButton);
+                    container.appendChild(editButton);
+                });
+            });
+
+            // Function to reattach event listeners to the restored post links and new post button
+            function reattachEventListeners() {
+                const restoredPostLinks = document.querySelectorAll(".post-link");
+                restoredPostLinks.forEach(function(link) {
+                    link.addEventListener("click", function(event) {
+                        event.preventDefault();
+
+                        // Get the title and body content
+                        const titleContent = link.textContent.trim();
+                        const bodyContent = link.getAttribute("data-body");
+
+                        // Create new elements to display the title and body
+                        const newTitle = document.createElement("h1");
+                        newTitle.textContent = titleContent;
+                        const newBody = document.createElement("p");
+                        newBody.textContent = bodyContent;
+
+                        // Create a back button
+                        const backButton = document.createElement("button");
+                        backButton.textContent = "Back";
+                        backButton.className = "btn btn-secondary";
+                        backButton.addEventListener("click", function() {
+                            // Restore the original content
+                            document.getElementById("mainContainer").innerHTML = originalContent;
+                            // Reattach event listeners to the restored post links and new post button
+                            reattachEventListeners();
+                        });
+
+                        // Save the original content
+                        const originalContent = document.getElementById("mainContainer").innerHTML;
+
+                        // Clear the existing content
+                        const container = document.getElementById("mainContainer");
+                        container.innerHTML = "";
+
+                        // Append the new title, body, and back button to the container
+                        container.appendChild(newTitle);
+                        container.appendChild(newBody);
+                        container.appendChild(backButton);
+                    });
+                });
+
+                // Reattach event listener to the new post button
+                const newPostButton = document.querySelector(".newPost");
+                newPostButton.addEventListener("click", showNewPostForm);
+
+                // Reattach event listeners to delete buttons
+                const deleteButtons = document.querySelectorAll(".delete-post");
+                deleteButtons.forEach(function(button) {
+                    button.addEventListener("click", handleDeletePost);
+                });
+
+                // Reattach event listeners to edit buttons
+                const editButtons = document.querySelectorAll(".edit-post");
+                editButtons.forEach(function(button) {
+                    button.addEventListener("click", handleEditPost);
+                });
+            }
+        });
+    </script>
+</body>
+<%- include("partials/footer.ejs") %>

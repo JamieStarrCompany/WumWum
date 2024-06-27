@@ -1,0 +1,66 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+}
+
+body {
+    background: #E7F6F8;
+    font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui,
+    helvetica neue, helvetica, Ubuntu, roboto, noto, arial, sans-serif;  
+    color:#00BDE3;
+    
+}
+
+.purp {
+   color: #009EC1 !important; 
+    font-size: 3.5rem;
+}
+
+h1 {
+    font-size: 1.5rem;
+    
+}
+
+p {
+    font-style: italic;
+}
+
+
+
+ul {
+    list-style: none;
+}
+
+#post-link {
+    text-decoration: underline;
+    align-items : center;
+    align-content : space-between;
+    margin-top: 10%;
+}
+
+#full_post {
+    display: none;
+}
+
+#makePost {
+    display: none;   
+    
+}
+
+
+.btn-two {
+    border-color: #00BDE3;
+    color: #00BDE3;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+}
+
+.form-group {
+    margin-right: 10%;
+}
